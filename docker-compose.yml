@@ -1,0 +1,82 @@
+---
+version: "2.1"
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - /home/arr/sonarr/data:/config
+      - /mnt/media-server/Shows:/tv #optional
+      - /home/arr/client-downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - /home/arr/radarr/data:/config
+      - /mnt/media-server/Movies:/movies #optional
+      - /home/arr/client-downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - AUTO_UPDATE=true #optional
+    volumes:
+      - /home/arr/jackett/data:/config
+      - /home/arr/client-downloads:/downloads
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - USER=USER #optional
+      - PASS=PASS #optional
+    volumes:
+      - /home/arr/transmission/data:/config
+      - /home/arr/client-downloads:/downloads
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    ports:
+      - 8096:8096
+    volumes:
+      - /mnt/media-server/Movies:/media/Movies
+      - /mnt/media-server/Shows:/media/Shows
+      - /home/arr/jellyfin/config:/config
+      - /home/arr/jellyfin/cache:/cache
+      - /home/arr/jellyfin/media2:/media2:ro
+    restart: 'unless-stopped'
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - JELLYFIN_PublishedServerUrl=https://your-url.io
